@@ -99,9 +99,10 @@ class BlockchainController {
 
     // This endpoint allows you to request the list of Stars registered by an owner
     getStarsByOwner() {
-        this.app.get("/blocks/:address", async (req, res) => {
+        this.app.get("/blocks/address/:address", async (req, res) => {
             if(req.params.address) {
                 const address = req.params.address;
+                // console.log('address:',address);
                 try {
                     let stars = await this.blockchain.getStarsByWalletAddress(address);
                     if(stars){
@@ -116,6 +117,13 @@ class BlockchainController {
                 return res.status(500).send("Block Not Found! Review the Parameters!");
             }
             
+        });
+    }
+
+    validateChain(){
+        this.app.post("/validateChain", async(req, res) =>{
+            console.log('validateChain');
+            await this.blockchain.validateChain();
         });
     }
 

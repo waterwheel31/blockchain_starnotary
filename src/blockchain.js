@@ -128,11 +128,15 @@ class Blockchain {
             let messageTime = parseInt(message.split(':')[1]);  // 1 
             console.log("message time:",messageTime);
             let currentTime = parseInt(new Date().getTime().toString().slice(0, -3));  // 2 
-            if (currentTime - messageTime > 60 * 5 ){reject();}   // 3 
+            if (currentTime - messageTime > 60 * 20 ){reject();}   // 3 
             console.log("current time:",currentTime);
             bitcoinMessage.verify(message, address, signature);  
-            let block = new BlockClass.Block({data: message});
-            await this._addBlock(block);
+
+            let obj = {
+                "address": address,
+                "data": star
+            }
+            let block = new BlockClass.Block(obj);
             console.log("block added");
             resolve(await this._addBlock(block));
         });
@@ -190,18 +194,22 @@ class Blockchain {
     getStarsByWalletAddress (address) {
         let self = this;
         let stars = [];
-        return new Promise((resolve, reject) => {
-            console.log('hash:',hash);
-            self.getChainHeight().then(function(height){
-                for (let i=0; i<height; i++){
-                    self.getBlockByHeight(i).then(function(block){
-                        if (block.body.address == address){
-                            stars.push(block.getData());
-                        }
-                    });
+        console.log('address:',address);
+        return new Promise(async (resolve, reject) => {
+            let height = await self.getChainHeight()
+            console.log('height:',height);
+            for (let i=1; i<height +1; i++){
+                console.log('i:',i,self.chain[i].getBData());
+                let block = await self.chain[i].getBData();
+                console.log('block address:',block.address);
+            
+                if (block.address == address){                   
+                    stars.push(self.chain[i]);
+                    console.log('stars[]',stars);
                 }
-            });
-           resolve(stars);
+            }
+            console.log('resolve');
+            resolve(stars);
         });
     }
 
@@ -216,11 +224,11 @@ class Blockchain {
         let errorLog = [];
         let previousHash = 0; 
         return new Promise(async (resolve, reject) => {
-             let chainLength = await self.getBlockHeight();
-             for (var i = 0; i < chainLength-1; i++) {
+             let chainLength = await self.getChainHeight();
+             for (var i = 0; i < chainLength; i++) {
                  let block = self.getBlockByHeight(i); 
                  let hash = block.hash;
-                 let validate = await self.validate(i);
+                 let validate = await block.validate();
                  if (!validate)errorLog.push(i);  // 1
                  if (i > 0){
                      if (previousHash != block.previousHash) errorLog.push(i);  // 2 

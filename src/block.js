@@ -73,7 +73,7 @@ class Block {
             let encodedData = this.body;
             let decodedData = hex2ascii(encodedData);
             let JSdata = JSON.parse(decodedData);
-            if (this.height != 0){
+            if (this.height >= 0){
                 resolve (JSdata);
             } else{
                 reject(null);
