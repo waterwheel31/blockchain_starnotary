@@ -77,7 +77,11 @@ class Blockchain {
             block.height = currentHeight + 1;
             this.height = self.height + 1;
             console.log('chain height increased:', self.height);
-            block.previousBlockHash = await self.getBlockByHeight(currentHeight).hash;
+
+            if (this.height > 0){
+                block.previousBlockHash = self.chain[currentHeight].hash;
+            }
+           
             console.log('block previous hash:',block.previousBlockHash);
             block.hash =  SHA256(block.height + block.body + block.time + block.previousBlockHash).toString();
             self.chain.push(block);
@@ -130,7 +134,7 @@ class Blockchain {
             let block = new BlockClass.Block({data: message});
             await this._addBlock(block);
             console.log("block added");
-            resolve();
+            resolve(await this._addBlock(block));
         });
     }
 
@@ -212,11 +216,12 @@ class Blockchain {
         let errorLog = [];
         let previousHash = 0; 
         return new Promise(async (resolve, reject) => {
-             let chainLength = await this.getBlockHeight();
+             let chainLength = await self.getBlockHeight();
              for (var i = 0; i < chainLength-1; i++) {
                  let block = self.getBlockByHeight(i); 
                  let hash = block.hash;
-                 if (!this.validateBlock(i))errorLog.push(i);  // 1
+                 let validate = await self.validate(i);
+                 if (!validate)errorLog.push(i);  // 1
                  if (i > 0){
                      if (previousHash != block.previousHash) errorLog.push(i);  // 2 
                  }

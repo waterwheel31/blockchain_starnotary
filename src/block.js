@@ -48,7 +48,7 @@ class Block {
             // Returning the Block is valid
             let currentHash = this.hash; 
             let newHash = SHA256(this.height + this.body + this.time + this.previousBlockHash).toString();
-            let isHashSame = ( currentlHash == newHash );
+            let isHashSame = ( currentHash == newHash );
             resolve (isHashSame);
 
         });
