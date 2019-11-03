@@ -133,7 +133,7 @@ class Blockchain {
             bitcoinMessage.verify(message, address, signature);  
 
             let obj = {
-                "address": address,
+                "owner": address,
                 "data": star
             }
             let block = new BlockClass.Block(obj);
@@ -201,10 +201,10 @@ class Blockchain {
             for (let i=1; i<height +1; i++){
                 console.log('i:',i,self.chain[i].getBData());
                 let block = await self.chain[i].getBData();
-                console.log('block address:',block.address);
+                console.log('block address:',block.owner);
             
-                if (block.address == address){                   
-                    stars.push(self.chain[i]);
+                if (block.owner == address){                   
+                    stars.push(block);
                     console.log('stars[]',stars);
                 }
             }
@@ -236,13 +236,16 @@ class Blockchain {
                      if (previousHash != block.previousHash) errorLog.push(i);  // 2 
                  }
                  previousHash = hash;
-             }
-        if (errorLog.length>0) {
-            console.log('Block errors = ' + errorLog.length);
-            console.log('Blocks: '+ errorLog);
-        } else {
-            console.log('No errors detected');
-        }
+            }
+            if (errorLog.length>0) {
+                console.log('Block errors = ' + errorLog.length);
+                console.log('Blocks: '+ errorLog);
+                reject(errorLog);
+            } else {
+                console.log('No errors detected');
+                resolve(true);
+            }
+            
         });
 
     }
